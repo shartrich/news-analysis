@@ -89,9 +89,9 @@ def get_daily_news(key):
     news['category'] = news['source'].map(lambda s: category(s, d))
     news['scraping_date'] = to_datetime
     
-
-    save_path = current_directory + '/data/news/%s.csv' % file_format_datetime(to_datetime)
-    news.to_csv(save_path, index=False, encoding='utf-8')
+    if len(news.index) > 0:
+        save_path = current_directory + '/data/news/%s.csv' % file_format_datetime(to_datetime)
+        news.to_csv(save_path, index=False, encoding='utf-8')
 
     print('Done', datetime.now())
 
