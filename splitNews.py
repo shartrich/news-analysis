@@ -1,6 +1,12 @@
 import pandas as pd
 import os
 from datetime import datetime, timedelta
+from dotenv import load_dotenv
+
+load_dotenv()
+
+
+news_path = os.getenv('NEWS_PATH')
 
 
 def file_format_datetime(datetime_value):
@@ -14,7 +20,7 @@ current_datetime_string = current_datetime.isoformat(timespec='seconds')
 from_datetime = current_datetime - timedelta(days=days_ago_start)
 from_datetime_string = from_datetime.isoformat(timespec='seconds')
 
-data = pd.read_csv('./data/news.csv')
+data = pd.read_csv(news_path)
 
 for days_ago in range(days_ago_start-1, 0, -1):
     from_datetime = current_datetime - timedelta(days=days_ago)
