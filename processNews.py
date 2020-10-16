@@ -32,7 +32,7 @@ from sklearn.cluster import MiniBatchKMeans, KMeans
 from sklearn.metrics import silhouette_score
 from sklearn.pipeline import make_pipeline
 from sklearn.preprocessing import Normalizer
-from wordcloud import WordCloud
+# from wordcloud import WordCloud
 
 
 # profile 1 week of news at a time
@@ -67,15 +67,15 @@ def file_format_datetime(datetime_value):
 def title_format_datetime(datetime_value):
     return datetime_value.isoformat(timespec='seconds')
 
-def plot_word_cloud(terms):
-   text = terms.index
-   text = ' '.join(list(text))
-   # lower max_font_size
-   wordcloud = WordCloud(max_font_size=40).generate(text)
-   plt.figure(figsize=(25, 25))
-   plt.imshow(wordcloud, interpolation="bilinear")
-   plt.axis("off")
-   plt.show()
+# def plot_word_cloud(terms):
+#    text = terms.index
+#    text = ' '.join(list(text))
+#    # lower max_font_size
+#    wordcloud = WordCloud(max_font_size=40).generate(text)
+#    plt.figure(figsize=(25, 25))
+#    plt.imshow(wordcloud, interpolation="bilinear")
+#    plt.axis("off")
+#    plt.show()
 
 
 def test_no_overlap(word_list):
