@@ -74,7 +74,7 @@ def file_format_datetime(datetime_value):
     return datetime_value.isoformat(timespec='seconds').replace(':','')
 
 def title_format_datetime(datetime_value):
-    return datetime_value.isoformat(timespec='seconds')
+    return datetime_value.isoformat(timespec='seconds').split('T')[0]
 
 # def plot_word_cloud(terms):
 #    text = terms.index
@@ -383,8 +383,8 @@ kmeans_df['Desc'] = kmeans_df['int_vals'].map(s)
 reset_output()
 output_notebook()
 
-plot_title = "KMeans Clustering of the News: %s - %s" % (title_format_datetime(from_datetime), title_format_datetime(to_datetime))
-plot_kmeans = bp.figure(plot_width=1400, plot_height=1000, title="KMeans Clustering of the News",
+plot_title = "KMeans Clustering of the News: %s - %s (%s articles)" % (title_format_datetime(from_datetime), title_format_datetime(to_datetime), len(data.index))
+plot_kmeans = bp.figure(plot_width=1400, plot_height=1000, title=plot_title,
     tools="pan,wheel_zoom,box_zoom,reset,hover,previewsave",
     x_axis_type=None, y_axis_type=None, min_border=1)
 
@@ -400,7 +400,7 @@ hover.tooltips={"Category": "@category", "Cluster": "@Desc", "Description": "@de
 
 
 save_path = current_directory + '/output/bokeh/kmeans/%s.html' % file_format_datetime(to_datetime)
-copy_path = PATH_TO_FLASK_APP + '/kmeans.html'
+copy_path = PATH_TO_FLASK_APP + '/%s.html' % file_format_datetime(to_datetime)
 # output_file(save_path)
 save(plot_kmeans, save_path, title='News Analysis')
 
