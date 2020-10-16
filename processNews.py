@@ -33,6 +33,15 @@ from sklearn.metrics import silhouette_score
 from sklearn.pipeline import make_pipeline
 from sklearn.preprocessing import Normalizer
 # from wordcloud import WordCloud
+from shutil import copyfile
+
+
+from dotenv import load_dotenv
+
+load_dotenv()
+
+
+PATH_TO_FLASK_APP = os.getenv('PATH_TO_FLASK_APP')
 
 
 # profile 1 week of news at a time
@@ -391,8 +400,11 @@ hover.tooltips={"Category": "@category", "Cluster": "@Desc", "Description": "@de
 
 
 save_path = current_directory + '/output/bokeh/kmeans/%s.html' % file_format_datetime(to_datetime)
+copy_path = PATH_TO_FLASK_APP + '/kmeans.html'
 # output_file(save_path)
 save(plot_kmeans, save_path, title='News Analysis')
+
+copyfile(save_path, copy_path)
 print('Done')
 # show(plot_kmeans)
 # plt.show()
