@@ -10,8 +10,6 @@ from collections import Counter
 import re
 import os
 import numpy as np
-from tqdm import tqdm_notebook
-tqdm_notebook().pandas()
 from matplotlib import pyplot as plt
 from functools import reduce
 from sklearn.manifold import TSNE
@@ -65,6 +63,9 @@ def load_news_data(from_datetime, to_datetime):
 
 def file_format_datetime(datetime_value):
     return datetime_value.isoformat(timespec='seconds').replace(':','')
+
+def title_format_datetime(datetime_value):
+    return datetime_value.isoformat(timespec='seconds')
 
 def plot_word_cloud(terms):
    text = terms.index
@@ -197,7 +198,7 @@ stop_words += additional_stop_words
 data = data[(data.description.map(len) > 140) & (data.description.map(len) <= 300)]
 data.reset_index(inplace=True, drop=True)
 
-data['tokens'] = data['description'].progress_map(lambda d: tokenizer(d))
+data['tokens'] = data['description'].map(lambda d: tokenizer(d))
 
 
 from sklearn.feature_extraction.text import TfidfVectorizer
@@ -258,7 +259,7 @@ hover = plot_tfidf.select(dict(type=HoverTool))
 hover.tooltips={"Category": "@category", "Cluster": "@Desc", "Description": "@description"}
 
 #display(HTML('<div style="margin:auto">'+div+'</div>'))
-output_file("output/bokeh/tfidf/%s.html" % file_format_datetime(to_datetime))
+# output_file("output/bokeh/tfidf/%s.html" % file_format_datetime(to_datetime))
 # show(plot_tfidf)
 
 
@@ -372,6 +373,8 @@ kmeans_df['Desc'] = kmeans_df['int_vals'].map(s)
 
 reset_output()
 output_notebook()
+
+plot_title = "KMeans Clustering of the News: %s - %s" % (title_format_datetime(from_datetime), title_format_datetime(to_datetime))
 plot_kmeans = bp.figure(plot_width=1400, plot_height=1000, title="KMeans Clustering of the News",
     tools="pan,wheel_zoom,box_zoom,reset,hover,previewsave",
     x_axis_type=None, y_axis_type=None, min_border=1)
@@ -388,7 +391,8 @@ hover.tooltips={"Category": "@category", "Cluster": "@Desc", "Description": "@de
 
 
 save_path = current_directory + '/output/bokeh/kmeans/%s.html' % file_format_datetime(to_datetime)
-output_file(save_path)
+# output_file(save_path)
+save(plot_kmeans, save_path, title='News Analysis')
 print('Done')
-show(plot_kmeans)
-plt.show()
+# show(plot_kmeans)
+# plt.show()
