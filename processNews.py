@@ -335,6 +335,8 @@ plot_kmeans.scatter('x', 'y', source=kmeans_df,
                     legend='Desc')
 hover = plot_kmeans.select(dict(type=HoverTool))
 hover.tooltips={"Category": "@category", "Cluster": "@Desc", "Description": "@description"}
+plot_kmeans.legend.location = "top_left"
+plot_kmeans.legend.click_policy="mute"
 
 
 
