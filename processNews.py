@@ -42,6 +42,9 @@ load_dotenv()
 
 
 PATH_TO_FLASK_APP = os.getenv('PATH_TO_FLASK_APP')
+FULL_RUN = os.getenv('FULL_RUN')
+if not FULL_RUN:
+    FULL_RUN = True
 
 
 # profile 1 week of news at a time
@@ -225,9 +228,6 @@ tfidf.columns = ['tfidf']
 # plt.show()
 
 
-
-
-
 #low impact generic words
 # plot_word_cloud(tfidf.sort_values(by=['tfidf'], ascending=True).head(40))
 # output_file('output/generic-words.png')
@@ -235,42 +235,6 @@ tfidf.columns = ['tfidf']
 #high impact words
 # plot_word_cloud(tfidf.sort_values(by=['tfidf'], ascending=False).head(40))
 # output_file('output/high-impact-words.png')
-
-from sklearn.decomposition import TruncatedSVD
-svd = TruncatedSVD(n_components=min(50,len(vectorizer.get_feature_names()) - 1), random_state=0)
-svd_tfidf = svd.fit_transform(vz)
-
-run = False
-if run:
-# run this (takes times)
-    tsne_model = TSNE(n_components=2, verbose=1, random_state=0, n_iter=500)
-    tsne_tfidf = tsne_model.fit_transform(svd_tfidf)
-    tsne_tfidf_df = pd.DataFrame(tsne_tfidf)
-    tsne_tfidf_df.columns = ['x', 'y']
-    tsne_tfidf_df['category'] = data['category']
-    tsne_tfidf_df['description'] = data['description']
-    tsne_tfidf_df.to_csv('./data/tsne_tfidf.csv', encoding='utf-8', index=False)
-else:
-# or import the dataset directly
-    tsne_tfidf_df = pd.read_csv('./data/tsne_tfidf.csv')
-
-output_notebook()
-plot_tfidf = bp.figure(plot_width=1400, plot_height=1000, title="tf-idf clustering of the news",
-    tools="pan,wheel_zoom,box_zoom,reset,hover,previewsave",
-    x_axis_type=None, y_axis_type=None, min_border=1)
-
-palette = d3['Category10'][len(tsne_tfidf_df['category'].unique())]
-color_map = bmo.CategoricalColorMapper(factors=tsne_tfidf_df['category'].map(str).unique(), palette=palette)
-
-plot_tfidf.scatter(x='x', y='y', color={'field': 'category', 'transform': color_map}, 
-                   legend='category', source=tsne_tfidf_df)
-hover = plot_tfidf.select(dict(type=HoverTool))
-hover.tooltips={"Category": "@category", "Cluster": "@Desc", "Description": "@description"}
-
-#display(HTML('<div style="margin:auto">'+div+'</div>'))
-# output_file("output/bokeh/tfidf/%s.html" % file_format_datetime(to_datetime))
-# show(plot_tfidf)
-
 
 
 distorsions = []
@@ -285,33 +249,11 @@ for k in range(2, k_max):
     distorsions.append(kmeans_model.inertia_)
 
 
-
-# f, (ax1, ax2) = plt.subplots(2, 1, sharex=True, figsize=(15, 10))
-
-# ax1.plot(range(2, k_max), distorsions)
-# ax1.set_title('Distorsion vs num of clusters')
-# ax1.grid(True)
-
-# ax2.plot(range(2, k_max), sil_scores)
-# ax2.set_title('Silhouette score vs num of clusters')
-# ax2.grid(True)
-# plt.show()
-
-
-
-
 kmeans_model = MiniBatchKMeans(n_clusters=num_clusters, init='k-means++', n_init=1, random_state=42,                       
                          init_size=1000, batch_size=1000, verbose=False, max_iter=1000, )
 kmeans = kmeans_model.fit(vz)
 kmeans_clusters = kmeans.predict(vz)
 kmeans_distances = kmeans.transform(vz)
-
-##for (i, desc),category in zip(enumerate(data.description),data['category']):
-##    if(i < 5):
-##        print("Cluster " + str(kmeans_clusters[i]) + ": " + desc + 
-##              "(distance: " + str(kmeans_distances[i][kmeans_clusters[i]]) + ")")
-##        print('category: ',category)
-##        print('---')
 
 
 sorted_centroids = kmeans.cluster_centers_.argsort()[:, ::-1]
@@ -350,9 +292,7 @@ for idx, row in keywords_df.iterrows():
 keywords_df['Summary'] = keywords_df.index.to_series().map(s2)
 keywords_df['Snippet'] = keywords_df.index.to_series().map(abbreviated_clusters)
 
-run = True
-if run:
-    #tsne_model = TSNE(n_components=2, verbose=1, random_state=0, n_iter=500)
+if FULL_RUN:
     tsne_model = TSNE(n_components=2, verbose=1, random_state=0, n_iter=500)
     tsne_kmeans = tsne_model.fit_transform(kmeans_distances)
     kmeans_df = pd.DataFrame(tsne_kmeans, columns=['x', 'y'])
@@ -369,7 +309,7 @@ else:
 
 
 s = {}
-# TODO undo this
+# TODO add this a toggle for full cluster names in legend vs abbreviated names
 # for idx, row in enumerate(keywords_df['Summary']):
 for idx, row in enumerate(keywords_df['Snippet']):
 	s[idx] = row
@@ -379,12 +319,11 @@ kmeans_df['int_vals'] = kmeans_df['cluster'].map(int)
 kmeans_df['Desc'] = kmeans_df['int_vals'].map(s)
 
 
-
 reset_output()
 output_notebook()
 
 plot_title = "KMeans Clustering of the News: %s - %s (%s articles)" % (title_format_datetime(from_datetime), title_format_datetime(to_datetime), len(data.index))
-plot_kmeans = bp.figure(plot_width=1400, plot_height=1000, title=plot_title,
+plot_kmeans = bp.figure(plot_width=1600, plot_height=1200, title=plot_title,
     tools="pan,wheel_zoom,box_zoom,reset,hover,previewsave",
     x_axis_type=None, y_axis_type=None, min_border=1)
 
@@ -401,10 +340,7 @@ hover.tooltips={"Category": "@category", "Cluster": "@Desc", "Description": "@de
 
 save_path = current_directory + '/output/bokeh/kmeans/%s.html' % file_format_datetime(to_datetime)
 copy_path = PATH_TO_FLASK_APP + '/%s.html' % file_format_datetime(to_datetime)
-# output_file(save_path)
 save(plot_kmeans, save_path, title='News Analysis')
 
 copyfile(save_path, copy_path)
 print('Done')
-# show(plot_kmeans)
-# plt.show()
