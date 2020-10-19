@@ -43,6 +43,10 @@ load_dotenv()
 
 PATH_TO_FLASK_APP = os.getenv('PATH_TO_FLASK_APP')
 FULL_RUN = os.getenv('FULL_RUN')
+CLUSTER_SIZE = os.getenv('CLUSTER_SIZE')
+if not CLUSTER_SIZE:
+    CLUSTER_SIZE = 8
+
 if not FULL_RUN:
     FULL_RUN = True
 
@@ -180,20 +184,19 @@ def tokenizer(text):
     return tokens
 
 
-def keywords(category):
+def keywords(category, cluster_size):
     tokens = data[data['category'] == category]['tokens']
     alltokens = []
     for token_list in tokens:
         alltokens += token_list
     counter = Counter(alltokens)
-    return counter.most_common(10)
+    return counter.most_common(cluster_size)
 
 
 to_datetime = datetime.now()
 from_datetime = to_datetime - timedelta(days=7)
 data = load_news_data(from_datetime, to_datetime)
 
-# data = pd.read_csv('./data/news.csv')
 data = data[~data['description'].isnull()]
 data = data.drop_duplicates('description')
 
@@ -217,15 +220,6 @@ from sklearn.feature_extraction.text import TfidfVectorizer
 
 vectorizer = TfidfVectorizer(min_df=5, analyzer='word', ngram_range=(1, 2), stop_words='english')
 vz = vectorizer.fit_transform(list(data['tokens'].map(lambda tokens: ' '.join(tokens))))
-
-
-tfidf = dict(zip(vectorizer.get_feature_names(), vectorizer.idf_))
-tfidf = pd.DataFrame(columns=['tfidf']).from_dict(dict(tfidf), orient='index')
-tfidf.columns = ['tfidf']
-
-
-# tfidf.tfidf.hist(bins=25, figsize=(15,7))
-# plt.show()
 
 
 #low impact generic words
@@ -269,27 +263,23 @@ for word in terms:
 all_keywords = []
 for i in range(num_clusters):
     topic_keywords = []
-    temp1 = [terms[i] for i in sorted_centroids[i, :10]]
-    temp2 = [terms[i] for i in sorted_centroids[i, 10:15]]
-    for j in sorted_centroids[i, :10]:
+    for j in sorted_centroids[i, :CLUSTER_SIZE]:
         if j not in multi_words:
             topic_keywords.append(terms[j])
             
     all_keywords.append(topic_keywords)
 
 keywords_df = pd.DataFrame(index=['topic_{0}'.format(i) for i in range(num_clusters)], 
-                           columns=['keyword_{0}'.format(i) for i in range(10)],
+                           columns=['keyword_{0}'.format(i) for i in range(CLUSTER_SIZE)],
                            data=all_keywords)
 
 
 s2 = {}
 abbreviated_clusters = {}
 for idx, row in keywords_df.iterrows():
-    s2[row.name] = [row.keyword_0, row.keyword_1, row.keyword_2, row.keyword_3, row.keyword_4, row.keyword_5, row.keyword_6, row.keyword_7,row.keyword_8, row.keyword_9]
-    abbreviated_clusters[row.name] = [row.keyword_0, row.keyword_1, row.keyword_2, row.keyword_3]
+    abbreviated_clusters[row.name] = [row.keyword_0, row.keyword_1, row.keyword_2, row.keyword_3, row.keyword_4, row.keyword_5, row.keyword_6, row.keyword_7]
 
 
-keywords_df['Summary'] = keywords_df.index.to_series().map(s2)
 keywords_df['Snippet'] = keywords_df.index.to_series().map(abbreviated_clusters)
 
 if FULL_RUN:
@@ -297,7 +287,6 @@ if FULL_RUN:
     tsne_kmeans = tsne_model.fit_transform(kmeans_distances)
     kmeans_df = pd.DataFrame(tsne_kmeans, columns=['x', 'y'])
     kmeans_df['cluster'] = kmeans_clusters
-    kmeans_df['cluster'] = kmeans_df['cluster'].map(str)
     kmeans_df['cluster'] = kmeans_df['cluster'].map(str)
     kmeans_df['headline'] = data['description']
     kmeans_df['description'] = kmeans_df['headline'].map(shorten_str)
@@ -312,7 +301,7 @@ s = {}
 # TODO add this a toggle for full cluster names in legend vs abbreviated names
 # for idx, row in enumerate(keywords_df['Summary']):
 for idx, row in enumerate(keywords_df['Snippet']):
-	s[idx] = row
+    s[idx] = row
 	
 
 kmeans_df['int_vals'] = kmeans_df['cluster'].map(int)
@@ -331,12 +320,9 @@ palette = d3['Category20'][20] + d3['Category20b'][20] + d3['Category20c'][20] +
 color_map = bmo.CategoricalColorMapper(factors=kmeans_df['cluster'].unique(), palette=palette)
 
 plot_kmeans.scatter('x', 'y', source=kmeans_df, 
-                    color={'field': 'cluster', 'transform': color_map}, 
-                    legend='Desc')
+                    color={'field': 'cluster', 'transform': color_map})
 hover = plot_kmeans.select(dict(type=HoverTool))
 hover.tooltips={"Category": "@category", "Cluster": "@Desc", "Description": "@description"}
-plot_kmeans.legend.location = "top_left"
-plot_kmeans.legend.click_policy="mute"
 
 
 
