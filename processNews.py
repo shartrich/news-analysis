@@ -202,7 +202,7 @@ data = data.drop_duplicates('description')
 
 stop_words = []
 
-f = open('./input/stopwords.txt', 'r')
+f = open(current_directory + '/input/stopwords.txt', 'r')
 for l in f.readlines():
     stop_words.append(l.replace('\n', ''))
     
