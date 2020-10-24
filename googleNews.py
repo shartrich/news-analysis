@@ -93,7 +93,7 @@ def get_daily_news(key):
         save_path = current_directory + '/data/news/%s.csv' % file_format_datetime(to_datetime)
         news.to_csv(save_path, index=False, encoding='utf-8')
 
-    print('Done', datetime.now())
+    print('Done', datetime.now(), len(news.index))
 
 n = datetime.now()
 h = n.hour % 4
