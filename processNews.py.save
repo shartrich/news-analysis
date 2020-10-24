@@ -291,9 +291,9 @@ if FULL_RUN:
     kmeans_df['headline'] = data['description']
     kmeans_df['description'] = kmeans_df['headline'].map(shorten_str)
     kmeans_df['category'] = data['category']
-    kmeans_df.to_csv(current_directory + '/data/tsne_kmeans.csv', index=False, encoding='utf-8')
+    kmeans_df.to_csv('./data/tsne_kmeans.csv', index=False, encoding='utf-8')
 else:
-    kmeans_df = pd.read_csv(current_directory + '/data/tsne_kmeans.csv')
+    kmeans_df = pd.read_csv('./data/tsne_kmeans.csv')
     kmeans_df['cluster'] = kmeans_df['cluster'].map(str)
 
 
