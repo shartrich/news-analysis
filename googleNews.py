@@ -144,5 +144,5 @@ if TEST_RUN:
     print('KEY_5')
     get_daily_news(KEYS[5])
 else:
-    print('KEY_%s' % h) 
+    print('KEY_%s' % h)
     get_daily_news(KEYS[h])

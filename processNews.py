@@ -40,8 +40,15 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
+# profile 1 week of news at a time
+period_days = 7
+current_directory = os.path.dirname(os.path.abspath(__file__))
+news_directory = '/data/news'
+results_directory = 'output'
 
-PATH_TO_FLASK_APP = os.getenv('PATH_TO_FLASK_APP')
+
+RELATIVE_PATH_TO_FLASK_APP = os.getenv('PATH_TO_FLASK_APP')
+PATH_TO_FLASK_APP = '%s/%s' % (current_directory, RELATIVE_PATH_TO_FLASK_APP)
 FULL_RUN = os.getenv('FULL_RUN')
 CLUSTER_SIZE = os.getenv('CLUSTER_SIZE')
 if not CLUSTER_SIZE:
@@ -49,13 +56,6 @@ if not CLUSTER_SIZE:
 
 if not FULL_RUN:
     FULL_RUN = True
-
-
-# profile 1 week of news at a time
-period_days = 7
-current_directory = os.path.dirname(os.path.abspath(__file__))
-news_directory = '/data/news'
-results_directory = 'output'
 
 num_clusters = 60
 max_line = 60
