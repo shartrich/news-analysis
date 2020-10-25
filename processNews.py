@@ -24,6 +24,7 @@ from bokeh.palettes import d3
 from bokeh.palettes import brewer
 import bokeh.models as bmo
 from bokeh.io import save, output_file
+from langdetect import detect
 
 
 import warnings
@@ -49,17 +50,11 @@ results_directory = 'output'
 
 RELATIVE_PATH_TO_FLASK_APP = os.getenv('PATH_TO_FLASK_APP')
 PATH_TO_FLASK_APP = '%s/%s' % (current_directory, RELATIVE_PATH_TO_FLASK_APP)
-FULL_RUN = os.getenv('FULL_RUN')
-CLUSTER_SIZE = os.getenv('CLUSTER_SIZE')
-if not CLUSTER_SIZE:
-    CLUSTER_SIZE = 8
-
-if not FULL_RUN:
-    FULL_RUN = True
+FULL_RUN = os.getenv('FULL_RUN', True)
+CLUSTER_SIZE = int(os.getenv('CLUSTER_SIZE', '8'))
 
 num_clusters = 60
 max_line = 60
-
 
 
 def load_news_data(from_datetime, to_datetime):
@@ -192,13 +187,15 @@ def keywords(category, cluster_size):
     counter = Counter(alltokens)
     return counter.most_common(cluster_size)
 
-
-to_datetime = datetime.now()
+# use UTC time
+to_datetime = datetime.utcnow()
 from_datetime = to_datetime - timedelta(days=7)
 data = load_news_data(from_datetime, to_datetime)
 
 data = data[~data['description'].isnull()]
 data = data.drop_duplicates('description')
+data = data[data['description'].map(detect) == 'en']
+
 
 stop_words = []
 

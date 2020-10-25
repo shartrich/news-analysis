@@ -19,10 +19,7 @@ KEYS.append(os.getenv('KEY_3'))
 KEYS.append(os.getenv('KEY_4'))
 KEYS.append(os.getenv('KEY_5'))
 
-SOURCE_CHUNK_SIZE = os.getenv('SOURCE_CHUNK_SIZE')
-if not SOURCE_CHUNK_SIZE:
-    SOURCE_CHUNK_SIZE = 19
-
+SOURCE_CHUNK_SIZE = int(os.getenv('SOURCE_CHUNK_SIZE'), '19')
 
 def chunkify_array(array, chunk_size):
     """Yield successive n-sized chunks from arr."""
