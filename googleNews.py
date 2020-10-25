@@ -141,7 +141,7 @@ n = datetime.now()
 h = n.hour % 5
 
 if TEST_RUN:
-    print('KEY_0')
+    print('KEY_5')
     get_daily_news(KEYS[5])
 else:
     print('KEY_%s' % h) 
