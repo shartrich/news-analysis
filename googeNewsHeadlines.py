@@ -22,7 +22,7 @@ BAD_PARENTS={'nav': 1, 'header': 1, 'footer': 1, 'article': 2, 'figcaption': 1, 
 }
 
 # some hosts block scraping:
-BAD_HOSTS = ['washingtonpost.com']
+BAD_HOSTS = ['washingtonpost.com', 'youtube.com']
 
 
 def tag_visible(element):
@@ -77,13 +77,29 @@ def get_category_urls():
         url_map[category] = make_google_news_url(url.get('href'))
     return url_map
 
-def get_url_text(url):
+def process_url(url):
+    data = {
+        'success': False,
+        'body': None,
+        'url': None
+    }
     try:
         res = requests.get(url, timeout=(2, 4))
     except requests.exceptions.Timeout as e:
-        print('Timeout error:', e)
-        return None
-    return text_from_html(res.text)
+        print('Timeout error:', e, url)
+        return data
+    except requests.exceptions.ConnectionError as e:
+        print('Connection refused error:', e, url)
+        return data
+
+    for bad_url in BAD_HOSTS:
+        if bad_url in res.url:
+            return data
+
+    data['body'] = text_from_html(res.text)
+    data['url'] = res.url
+    data['success'] = True
+    return data
 
 
 def aggregate_headlines(category_url):
@@ -138,22 +154,25 @@ def main():
         headlines = [dict(item, **{'category': category}) for item in base_headlines]
 
         for h in headlines:
-            h['story'] = get_url_text(h['url'])
-            if h['story']:
+            url_data = process_url(h['url'])
+            if url_data['success']:
+                h['url'] = url_data['url']
+                h['story'] = url_data['data']
                 data.append(h)
     
     print('Total stories loaded:', len(data))
     csv_file = NEWS_DIRECTORY + '/' + start.isoformat(timespec='seconds').replace(':', '') + '.csv'
-    with open(csv_file, 'wb') as write_file:
-        fieldnames = data[0].keys()
-        csv_writer = csv.DictWriter(write_file, delimiter=',', fieldnames=fieldnames)
-        for row in data:
-            csv_writer.writerow(row)
+    with open(csv_file, 'w', newline='') as write_file:
+        field_names = data[0].keys()
+        dict_writer = csv.DictWriter(write_file, field_names)
+        dict_writer.writeheader()
+        dict_writer.writerows(data)
 
 if __name__ == '__main__':
     main()
     # test_url = 'https://www.cbsnews.com/news/walmart-returning-firearm-guns-ammo-store-displays/'
-    # test_url = 'https://news.google.com/articles/CAIiEPRNUL7_efGlbCRt05BaZVsqGQgEKhAIACoHCAownob-CjCUzPYCMK_h3AU?hl=en-US&gl=US&ceid=US%3Aen'
+    # test_url = 'https://news.google.com/articles/CAIiEJ0ZsMvmKn3aAO3jKnT6-S8qFggEKg4IACoGCAowl6p7MN-zCTDlkko?hl=en-US&gl=US&ceid=US%3Aen'
     # test_url = 'https://www.newsobserver.com/news/state/north-carolina/article246835757.html'
     # data = get_url_text(test_url)
-    # print(data)
+    # r = requests.get(test_url)
+    # print(r.url)
