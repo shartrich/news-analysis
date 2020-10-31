@@ -157,7 +157,7 @@ def main():
             url_data = process_url(h['url'])
             if url_data['success']:
                 h['url'] = url_data['url']
-                h['story'] = url_data['data']
+                h['story'] = url_data['body']
                 data.append(h)
     
     print('Total stories loaded:', len(data))
