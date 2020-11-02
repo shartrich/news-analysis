@@ -1,7 +1,7 @@
 import pandas as pd
 import os
 from langdetect import detect
-from utils.config import PROJECT_DIRECTORY, NEWS_PATH
+from utils.configs.settings import PROJECT_DIRECTORY, NEWS_PATH
 
 def load_news_data(from_datetime, to_datetime, languages=['en']):
     """Take in 2 UTC datetimes and return the news articles published within that time period
