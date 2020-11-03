@@ -10,24 +10,24 @@ GOOGLE_NEWS_DIRECTORY = CURRENT_DIRECTORY + '/data/googleNews'
 GOOGLE_NEWS_URL = 'https://news.google.com/topstories?tab=wn&hl=en-US&gl=US&ceid=US:en'
 
 VALID_CATEGORIES = [
-    'U.S.', 
-    'World', 
-    'Business', 
-    'Technology', 
-    'Entertainment', 
-    'Sports', 
-    'Science', 
+    'U.S.',
+    'World',
+    'Business',
+    'Technology',
+    'Entertainment',
+    'Sports',
+    'Science',
     'Health'
 ]
 
 BAD_PARENTS_MAP = {
-    'nav': 1, 
-    'header': 1, 
-    'footer': 1, 
-    'article': 2, 
-    'figcaption': 1, 
-    'figure': 1, 
-    'ul': 1, 
+    'nav': 1,
+    'header': 1,
+    'footer': 1,
+    'article': 2,
+    'figcaption': 1,
+    'figure': 1,
+    'ul': 1,
     'h1': 1,
     'h2': 1,
     'h3': 1,
@@ -37,6 +37,11 @@ BAD_PARENTS_MAP = {
 
 # some hosts block scraping:
 BAD_HOSTS = [
-    'washingtonpost.com', 
+    'washingtonpost.com',
     'youtube.com'
+]
+
+BAD_SOURCES = [
+    'The Washington Post',
+    'Miami Herald'
 ]

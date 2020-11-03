@@ -1,2 +1,2 @@
-from utils.config import *
+from utils.configs import *
 from utils.dataHelper import *

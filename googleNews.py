@@ -82,6 +82,9 @@ def process_url(url):
     except requests.exceptions.ConnectionError as e:
         print('Connection refused error:', e, url)
         return data
+    except:
+        print('Unhandled Request Exception:', url)
+        return data
 
     for bad_url in BAD_HOSTS:
         if bad_url in res.url:
