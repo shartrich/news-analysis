@@ -131,6 +131,7 @@ def get_daily_news(key):
         max_datetime = datetime.strptime(max_article_published_at, '%Y-%m-%dT%H:%M:%SZ')
         save_path = current_directory + '/data/news/%s.csv' % file_format_datetime(max_datetime)
         news.to_csv(save_path, index=False, encoding='utf-8')
+        print(save_path)
 
     print('Done', datetime.now(), len(news.index))
 
