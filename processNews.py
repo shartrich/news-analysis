@@ -187,6 +187,13 @@ def keywords(category, cluster_size):
     counter = Counter(alltokens)
     return counter.most_common(cluster_size)
 
+
+def detect_language(text):
+    try:
+        return detect(text)
+    except:
+        return 'Error'
+
 # use UTC time
 to_datetime = datetime.utcnow()
 from_datetime = to_datetime - timedelta(days=7)
@@ -194,7 +201,7 @@ data = load_news_data(from_datetime, to_datetime)
 
 data = data[~data['description'].isnull()]
 data = data.drop_duplicates('description')
-data = data[data['description'].map(detect) == 'en']
+data = data[data['description'].map(detect_language) == 'en']
 
 
 stop_words = []
